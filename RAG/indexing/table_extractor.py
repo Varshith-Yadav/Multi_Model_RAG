@@ -1,16 +1,26 @@
-import camelot
-import pandas as pd
+def extract_tables(pdf_path: str):
+    try:
+        import camelot
+    except ImportError as exc:
+        raise RuntimeError(
+            "camelot-py is not installed. Install dependencies from requirements.txt."
+        ) from exc
 
-def extract_tables(pdf_path):
-    tables = camelot.read_pdf(pdf_path, pages='all')
+    tables = camelot.read_pdf(pdf_path, pages="all")
     results = []
 
-    for t in tables:
-        results.append({
-            "page": t.page,
-            "table": t.df,
-            'source': pdf_path
-        })
+    for table in tables:
+        page = table.page
+        if isinstance(page, str) and page.isdigit():
+            page = int(page) - 1
+
+        results.append(
+            {
+                "page": page,
+                "table": table.df,
+                "source": pdf_path,
+            }
+        )
 
     return results
 

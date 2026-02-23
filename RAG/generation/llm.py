@@ -1,11 +1,25 @@
-import requests 
-def generate(prompt):
-    res = requests.post(
-        "http://localhost:11434/api/generate",
+import requests
+
+URL = "http://localhost:11434/api/generate"
+DEFAULT_MODEL = "llama3"
+
+
+def generate(prompt: str, model: str = DEFAULT_MODEL) -> str:
+    response = requests.post(
+        URL,
         json={
-            "model": 'llama3',
+            "model": model,
             "prompt": prompt,
-            "stream": False
-        }
+            "stream": False,
+        },
+        timeout=180,
     )
-    return res.json()['response']
+    response.raise_for_status()
+
+    data = response.json()
+    answer = data.get("response", "").strip()
+
+    if not answer:
+        raise RuntimeError(f"Empty response returned by Ollama for model '{model}'.")
+
+    return answer
