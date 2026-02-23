@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+streamlit
+requests
+numpy
+faiss-cpu
+pymupdf
+camelot-py[cv]
+pandas
+tqdm
+tabulate
