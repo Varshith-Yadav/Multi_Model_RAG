@@ -1,10 +1,12 @@
 import base64
+import os
 from pathlib import Path
 
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-DEFAULT_MODEL = "llava"
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+OLLAMA_URL = f"{OLLAMA_BASE_URL}/api/generate"
+DEFAULT_MODEL = os.getenv("VISION_MODEL", "llava")
 DEFAULT_PROMPT = "Describe the chart or diagram in detail."
 
 

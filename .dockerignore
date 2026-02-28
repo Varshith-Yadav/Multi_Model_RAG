@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+data/raw
+data/images
+vectorstore/faiss_index
+
+notebooks
+frontend

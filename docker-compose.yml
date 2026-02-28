@@ -1,0 +1,70 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: multimodel-rag-ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: multimodel-rag-api
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      GEN_MODEL: ${GEN_MODEL:-llama3}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      VISION_MODEL: ${VISION_MODEL:-llava}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./vectorstore:/app/vectorstore
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: multimodel-rag-ui
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      GEN_MODEL: ${GEN_MODEL:-llama3}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      VISION_MODEL: ${VISION_MODEL:-llava}
+    ports:
+      - "${UI_PORT:-8501}:8501"
+    volumes:
+      - ./data:/app/data
+      - ./vectorstore:/app/vectorstore
+    depends_on:
+      - ollama
+      - app
+    restart: unless-stopped
+    command: streamlit run streamlit_app.py --server.address=0.0.0.0 --server.port=8501
+
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["jobs"]
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      GEN_MODEL: ${GEN_MODEL:-llama3}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      VISION_MODEL: ${VISION_MODEL:-llava}
+    volumes:
+      - ./data:/app/data
+      - ./vectorstore:/app/vectorstore
+    depends_on:
+      - ollama
+    command: python scripts/ingest.py
+
+volumes:
+  ollama_data:

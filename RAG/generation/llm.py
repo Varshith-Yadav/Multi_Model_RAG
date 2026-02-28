@@ -1,7 +1,10 @@
+import os
+
 import requests
 
-URL = "http://localhost:11434/api/generate"
-DEFAULT_MODEL = "llama3"
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+URL = f"{OLLAMA_BASE_URL}/api/generate"
+DEFAULT_MODEL = os.getenv("GEN_MODEL", "llama3")
 
 
 def generate(prompt: str, model: str = DEFAULT_MODEL) -> str:

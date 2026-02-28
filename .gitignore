@@ -140,3 +140,8 @@ data/
 models/
 *.pkl
 *.pickle
+
+
+vectorstore/
+rag/data/raw/
+rag/data/images/

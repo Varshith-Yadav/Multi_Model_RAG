@@ -64,6 +64,59 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
+## Deploy with Docker Compose (Recommended)
+
+This repo now includes:
+- `Dockerfile`
+- `docker-compose.yml`
+- `.env.example`
+
+### 1) Prepare env file
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 2) Start services
+
+```powershell
+docker compose up -d --build
+```
+
+### 3) Pull Ollama models (one-time)
+
+```powershell
+docker compose exec ollama ollama pull llama3
+docker compose exec ollama ollama pull nomic-embed-text
+docker compose exec ollama ollama pull llava
+```
+
+### 4) Add PDFs and build FAISS index
+
+Put PDFs into `data/raw/`, then run:
+
+```powershell
+docker compose --profile jobs run --rm ingest
+```
+
+### 5) Access apps
+
+- Streamlit UI: `http://localhost:8501`
+- FastAPI: `http://localhost:8000`
+- Health check: `http://localhost:8000/health`
+
+### 6) Stop services
+
+```powershell
+docker compose down
+```
+
+To keep containers but stop only:
+
+```powershell
+docker compose stop
+```
+
 Start Ollama server:
 
 ```powershell
@@ -77,6 +130,19 @@ ollama pull llama3
 ollama pull nomic-embed-text
 ollama pull llava
 ```
+
+## Deploy on a Cloud VM
+
+For production, use a VM/VPS (not serverless), then:
+
+1. Install Docker + Compose.
+2. Clone repo.
+3. Run the same Docker Compose commands above.
+4. Expose only ports you need (usually 8501 and/or 8000) behind Nginx/Caddy with TLS.
+5. Keep persistent storage for:
+   - Ollama model volume (`ollama_data`)
+   - `data/`
+   - `vectorstore/`
 
 ## Data Preparation
 
@@ -187,3 +253,4 @@ python scripts\query_demo.py "What is the profit margin?" 5
   - `RAG/embeddings/ollama_embed.py`
   - `RAG/generation/llm.py`
   - `RAG/multimodel/image_captioner.py`
+- For container deployment, model/host settings are controlled by `.env` and passed via `docker-compose.yml`.

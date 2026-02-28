@@ -1,7 +1,10 @@
+import os
+
 import requests
 
-URL = "http://localhost:11434/api/embeddings"
-DEFAULT_MODEL = "nomic-embed-text"
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+URL = f"{OLLAMA_BASE_URL}/api/embeddings"
+DEFAULT_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 
 
 def embed(text: str, model: str = DEFAULT_MODEL):
